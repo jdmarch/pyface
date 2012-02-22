@@ -35,8 +35,9 @@ class MainWindow(ApplicationWindow):
 
         # Create an action that exits the application.
         exit_action = Action(name='E&xit', on_perform=self.close)
+        self.exit_action = exit_action
         
-        # Test action to make all groups invisible.
+        # Test action to toggle visibility of exit action and some action groups
         test_action = Action(name='&Toggle', on_perform=self.toggle)
 
         # Add a menu bar.
@@ -44,14 +45,13 @@ class MainWindow(ApplicationWindow):
             MenuManager(exit_action, name='&File')
         )
 
-        # Add some tool bars.
+        # Add some tool bars, with the first one subdivided into action groups
         self.tool_bar_managers = [
             ToolBarManager(
-                Group(exit_action, id='a'),
-                Group(id='b'),
+                Group(exit_action, exit_action, id='a'),
+                Group(id='b'),  # empty, so will remain hidden
                 Group(exit_action, exit_action, id='c'),
-                Group(id='d'),
-                Group(exit_action, exit_action, id='e'),
+                Group(exit_action, test_action, exit_action, id='d'),
                 name='Tool Bar 1', show_tool_names=False
             ),
 
@@ -71,18 +71,13 @@ class MainWindow(ApplicationWindow):
         return
     
     def toggle(self):
-        """ Toggle the visibility of the middle group in the first toolbar.
+        """ Toggle the visibility of the exit action and of the first 3 groups
+        in the first toolbar, which contain only exit actions.
         """
-        tbm = self.tool_bar_managers[0]
-        mid_group = tbm.groups[2]
-        visible = not mid_group.visible
-        print '====='
-        mid_group.print_traits()
-        for item in mid_group._items:
-            print '---'
-            item.print_traits()
-            item.visible = visible
-        mid_group.visible = visible
+        visible = not self.exit_action.visible
+        self.exit_action.visible = visible
+        for group in self.tool_bar_managers[0].groups[:-1]:
+            group.visible = visible
 
 
 # Application entry point.

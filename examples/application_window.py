@@ -17,7 +17,7 @@
 # Enthought library imports.
 from pyface.api import ApplicationWindow, GUI
 from pyface.action.api import Action, MenuManager, MenuBarManager
-from pyface.action.api import StatusBarManager, ToolBarManager
+from pyface.action.api import StatusBarManager, ToolBarManager, Group
 
 
 class MainWindow(ApplicationWindow):
@@ -35,6 +35,9 @@ class MainWindow(ApplicationWindow):
 
         # Create an action that exits the application.
         exit_action = Action(name='E&xit', on_perform=self.close)
+        
+        # Test action to make all groups invisible.
+        test_action = Action(name='&Toggle', on_perform=self.toggle)
 
         # Add a menu bar.
         self.menu_bar_manager = MenuBarManager(
@@ -44,7 +47,12 @@ class MainWindow(ApplicationWindow):
         # Add some tool bars.
         self.tool_bar_managers = [
             ToolBarManager(
-                exit_action, name='Tool Bar 1', show_tool_names=False
+                Group(exit_action, id='a'),
+                Group(id='b'),
+                Group(exit_action, exit_action, id='c'),
+                Group(id='d'),
+                Group(exit_action, exit_action, id='e'),
+                name='Tool Bar 1', show_tool_names=False
             ),
 
             ToolBarManager(
@@ -52,7 +60,7 @@ class MainWindow(ApplicationWindow):
             ),
 
             ToolBarManager(
-                exit_action, name='Tool Bar 3', show_tool_names=False
+                test_action, name='Tool Bar 3', show_tool_names=False
             ),
         ]
 
@@ -61,6 +69,20 @@ class MainWindow(ApplicationWindow):
         self.status_bar_manager.message = 'Example application window'
 
         return
+    
+    def toggle(self):
+        """ Toggle the visibility of the middle group in the first toolbar.
+        """
+        tbm = self.tool_bar_managers[0]
+        mid_group = tbm.groups[2]
+        visible = not mid_group.visible
+        print '====='
+        mid_group.print_traits()
+        for item in mid_group._items:
+            print '---'
+            item.print_traits()
+            item.visible = visible
+        mid_group.visible = visible
 
 
 # Application entry point.
